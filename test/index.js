@@ -1,13 +1,3 @@
-//sample test
-//Para rodar os testes, use: npm test
-//PS: Os testes não estão completos e alguns podem comnter erros.
-
-// veja mais infos em:
-//https://mochajs.org/
-//https://www.chaijs.com/
-//https://www.chaijs.com/plugins/chai-json-schema/
-//https://developer.mozilla.org/pt-PT/docs/Web/HTTP/Status (http codes)
-
 const app = require("../src/index.js");
 
 const assert = require("assert");
@@ -20,24 +10,8 @@ chai.use(chaiJson);
 
 const expect = chai.expect;
 
-//Define o minimo de campos que o usuário deve ter. Geralmente deve ser colocado em um arquivo separado
-const userSchema = {
-  title: "Schema do Usuario, define como é o usuario, linha 24 do teste",
-  type: "object",
-  required: ["name", "email", "age"],
-  properties: {
-    name: {
-      type: "string",
-    },
-    email: {
-      type: "string",
-    },
-    age: {
-      type: "number",
-      minimum: 18,
-    },
-  },
-};
+const { userSchema } = require("../src/db/fakeDb");
+const { runInThisContext } = require("vm");
 
 //Inicio dos testes
 
@@ -68,7 +42,7 @@ describe("Testes da aplicaçao", () => {
       .end(function (err, res) {
         expect(err).to.be.null;
         expect(res).to.have.status(200);
-        expect(res.body.rows).to.eql([]);
+        expect(res.body).to.eql([]);
         done();
       });
   });
@@ -76,72 +50,113 @@ describe("Testes da aplicaçao", () => {
   it("deveria criar o usuario raupp", function (done) {
     chai
       .request(app)
-      .post("/user")
+      .post("/users")
       .send({ name: "raupp", email: "jose.raupp@devoz.com.br", age: 35 })
       .end(function (err, res) {
         expect(err).to.be.null;
         expect(res).to.have.status(201);
+        expect(res.body).to.be.jsonSchema(userSchema.properties);
         done();
       });
   });
-  //...adicionar pelo menos mais 5 usuarios. se adicionar usuario menor de idade, deve dar erro. Ps: não criar o usuario naoExiste
 
-  it("o usuario naoExiste não existe no sistema", function (done) {
+  it(`deveria criar 5 usuários`, function () {
+    [
+      { name: "Clara", email: "clara@devoz.com.br", age: 30 },
+      { name: "Pedro", email: "pedro@devoz.com.br", age: 25 },
+      { name: "Carlos", email: "carlos@devoz.com.br", age: 55 },
+      { name: "Manoel", email: "manoel@devoz.com.br", age: 18 },
+      { name: "Leticia", email: "leticia@devoz.com.br", age: 24 },
+    ].forEach((value) => {
+      chai
+        .request(app)
+        .post("/users")
+        .send(value)
+        .end(function (err, res) {
+          expect(err).to.be.null;
+          expect(res).to.have.status(201);
+          expect(res.body).to.be.jsonSchema(userSchema.properties);
+        });
+    });
+  });
+
+  it("deveria não permitir a criação de usuário com menos de 18 anos", function (done) {
     chai
       .request(app)
-      .get("/user/naoExiste")
+      .post("/users")
+      .send({ name: "pedro", email: "pedro@devoz.com.br", age: 17 })
       .end(function (err, res) {
-        expect(err.response.body.error).to.be.equal("User not found"); //possivelmente forma errada de verificar a mensagem de erro
+        expect(err).to.be.null;
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
+
+  it("deveria não permitir a criação de usuário com cadastro incompleto", function (done) {
+    chai
+      .request(app)
+      .post("/users")
+      .send({ name: "pedro" })
+      .end(function (err, res) {
+        expect(err).to.be.null;
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
+
+  it("o usuário 10 não existe no sistema", function (done) {
+    chai
+      .request(app)
+      .get("/users/10")
+      .end(function (err, res) {
+        expect(err).to.be.null;
         expect(res).to.have.status(404);
-        expect(res.body).to.be.jsonSchema(userSchema);
         done();
       });
   });
 
-  it("o usuario raupp existe e é valido", function (done) {
+  it("o usuario 1 existe e é valido", function (done) {
     chai
       .request(app)
-      .get("/user/raupp")
+      .get("/users/1")
       .end(function (err, res) {
         expect(err).to.be.null;
         expect(res).to.have.status(200);
-        expect(res.body).to.be.jsonSchema(userSchema);
+        expect(res.body).to.be.jsonSchema(userSchema.properties);
         done();
       });
   });
 
-  it("deveria excluir o usuario raupp", function (done) {
+  it("deveria excluir o usuario 1", function (done) {
     chai
       .request(app)
-      .delete("/user/raupp")
+      .delete("/users/1")
       .end(function (err, res) {
         expect(err).to.be.null;
         expect(res).to.have.status(200);
-        expect(res.body).to.be.jsonSchema(userSchema);
         done();
       });
   });
 
-  it("o usuario raupp não deve existir mais no sistema", function (done) {
+  it("o usuario 1 não deve existir mais no sistema", function (done) {
     chai
       .request(app)
-      .get("/user/raupp")
+      .get("/users/1")
       .end(function (err, res) {
         expect(err).to.be.null;
-        expect(res).to.have.status(200);
-        expect(res.body).to.be.jsonSchema(userSchema);
+        expect(res).to.have.status(404);
         done();
       });
   });
 
-  it("deveria ser uma lista com pelomenos 5 usuarios", function (done) {
+  it("deveria ser uma lista com pelo menos 5 usuarios", function (done) {
     chai
       .request(app)
       .get("/users")
       .end(function (err, res) {
         expect(err).to.be.null;
         expect(res).to.have.status(200);
-        expect(res.body.total).to.be.at.least(5);
+        expect(res.body.length).to.be.above(4);
         done();
       });
   });

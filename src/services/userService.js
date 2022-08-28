@@ -6,17 +6,12 @@ function service() {
       ctx.body = users;
     },
     getUser(ctx) {
-      let userById = users.filter((user) => {
-        if (user.id == ctx.params.id) {
-          return true;
-        }
-      });
-
-      if (userById.length) {
-        ctx.body = getUser[0];
+      const user = users.find((users) => users.id === Number(ctx.params.id));
+      if (user) {
+        ctx.body = user;
       } else {
         ctx.response.status = 404;
-        ctx.body = "Erro: usuário não encontrado.";
+        ctx.body = "Erro: Usuário não encontrado.";
       }
     },
     createUser(ctx) {
@@ -27,9 +22,11 @@ function service() {
       ) {
         ctx.response.status = 400;
         ctx.body = "Erro: Preencha todos os campos.";
+      } else if (ctx.request.body.age < 18) {
+        ctx.response.status = 400;
+        ctx.body = "Erro: Idade mínima é 18 anos.";
       } else {
-        let newId = users[users.length - 1].id + 1;
-
+        let newId = users.length + 1;
         users.push({
           id: newId,
           name: ctx.request.body.name,
