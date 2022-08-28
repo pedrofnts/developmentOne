@@ -23,7 +23,7 @@ function service() {
       if (
         !ctx.request.body.name ||
         !ctx.request.body.email ||
-        !ctx.request.body.phone
+        !ctx.request.body.age
       ) {
         ctx.response.status = 400;
         ctx.body = "Erro: Preencha todos os campos.";
@@ -34,7 +34,7 @@ function service() {
           id: newId,
           name: ctx.request.body.name,
           email: ctx.request.body.email,
-          phone: ctx.request.body.phone,
+          age: ctx.request.body.age,
         });
         ctx.response.status = 201;
         ctx.body = `O usuário ${ctx.request.body.name} foi adicionado. Seu ID é ${newId}.`;
@@ -44,7 +44,7 @@ function service() {
       if (
         !ctx.request.body.name ||
         !ctx.request.body.email ||
-        !ctx.request.body.phone
+        !ctx.request.body.age
       ) {
         ctx.response.status = 400;
         ctx.body = "Erro: Preencha todos os campos.";
@@ -60,7 +60,7 @@ function service() {
           id: Number(ctx.params.id),
           name: ctx.request.body.name,
           email: ctx.request.body.email,
-          phone: ctx.request.body.phone,
+          age: ctx.request.body.age,
         };
         ctx.body = `Usuário ID ${ctx.params.id} atualizado`;
       }

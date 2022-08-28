@@ -24,7 +24,7 @@ router.get("/", async (ctx) => {
 });
 
 koa.use(users.routes());
-//koa.use(router.routes()).use(router.allowedMethods());
+koa.use(router.routes()).use(router.allowedMethods());
 
 const server = koa.listen(PORT);
 
