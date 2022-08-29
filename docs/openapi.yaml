@@ -1,0 +1,142 @@
+openapi: 3.0.1
+info:
+  title: API de Usuários
+  description: API para controle de usuários criada para o teste técnico da DevOZ/OZmap.
+  version: 1.0.0
+  contact:
+    name: Pedro Fontes (Desenvolvedor)
+    email: pedro7fontes@gmail.com
+    url: https://pfontes.me
+  license:
+    name: 'Licença: GPLv3'
+    url: https://gnu.org/licenses/gpl-3.0.html
+externalDocs:
+  description: GitHub
+  url: https://github.com/pedrofnts
+servers:
+  - url: http://localhost:3000
+    description: Servidor local
+paths:
+  /users:
+    get:
+      summary: Recupera todos os usuários
+      responses:
+        '200':
+          description: Operação realizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+    post:
+      summary: Cria novo usuário
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /users/{id}:
+    get:
+      summary: Recupera um usuário pelo ID
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              example: Usuário não encontrado
+    put:
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+      summary: Edita usuário
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Não foram preenchidos todos os campos
+          content:
+            application/json:
+              example: 'Erro: preencha todos os campos'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              example: 'Erro: Usuário não encontrado'
+    delete:
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+      summary: Remove usuário
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              example: Usuário removido com sucesso
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              example: 'Erro: Usuário não encontrado'
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        email:
+          type: string
+        age:
+          type: integer
+          minimum: 18
+    Users:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
+    UserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        age:
+          type: integer
+          minimum: 18
