@@ -59,7 +59,7 @@ function service() {
           email: ctx.request.body.email,
           age: ctx.request.body.age,
         };
-        ctx.body = `Usuário ID ${ctx.params.id} atualizado`;
+        ctx.body = `Usuário ${ctx.params.id} atualizado`;
       }
     },
     deleteUser(ctx) {
@@ -74,7 +74,7 @@ function service() {
           }
         }
         ctx.response.status = 200;
-        ctx.body = `Usuário ${ctx.params.id} foi removido`;
+        ctx.body = `Usuário ${ctx.params.id} removido com sucesso`;
       }
     },
   };
