@@ -45,20 +45,24 @@ function service() {
       ) {
         ctx.response.status = 400;
         ctx.body = "Erro: Preencha todos os campos.";
-      }
-      const mapId = users.map((user) => user.id);
-      const updateIndex = mapId.indexOf(parseInt(ctx.params.id));
-
-      if (updateIndex === -1) {
-        ctx.response.status = 404;
-        ctx.body = `Erro: Usuário não encontrado.`;
+      } else if (ctx.request.body.age < 18) {
+        ctx.response.status = 400;
+        ctx.body = "Erro: Idade mínima é 18 anos.";
       } else {
-        users[updateIndex] = {
-          id: Number(ctx.params.id),
-          name: ctx.request.body.name,
-          email: ctx.request.body.email,
-          age: ctx.request.body.age,
-        };
+        const mapId = users.map((user) => user.id);
+        const updateIndex = mapId.indexOf(parseInt(ctx.params.id));
+
+        if (updateIndex === -1) {
+          ctx.response.status = 404;
+          ctx.body = `Erro: Usuário não encontrado.`;
+        } else {
+          users[updateIndex] = {
+            id: Number(ctx.params.id),
+            name: ctx.request.body.name,
+            email: ctx.request.body.email,
+            age: ctx.request.body.age,
+          };
+        }
         ctx.body = `Usuário ${ctx.params.id} atualizado`;
       }
     },

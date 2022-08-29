@@ -47,7 +47,7 @@ describe("Testes da aplicaçao", () => {
       });
   });
 
-  it("deveria criar o usuario raupp", function (done) {
+  it("deveria criar o usuario 1", function (done) {
     chai
       .request(app)
       .post("/users")
@@ -104,6 +104,30 @@ describe("Testes da aplicaçao", () => {
       });
   });
 
+  it("deveria não permitir a atualização de usuário com cadastro incompleto", function (done) {
+    chai
+      .request(app)
+      .put("/users/1")
+      .send({ name: "pedro" })
+      .end(function (err, res) {
+        expect(err).to.be.null;
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
+
+  it("deveria não permitir a atualização de usuário para idade menor que 18 anos", function (done) {
+    chai
+      .request(app)
+      .post("/users")
+      .send({ name: "pedro", email: "pedro@devoz.com.br", age: 17 })
+      .end(function (err, res) {
+        expect(err).to.be.null;
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
+
   it("o usuário 10 não existe no sistema", function (done) {
     chai
       .request(app)
@@ -142,6 +166,17 @@ describe("Testes da aplicaçao", () => {
     chai
       .request(app)
       .get("/users/1")
+      .end(function (err, res) {
+        expect(err).to.be.null;
+        expect(res).to.have.status(404);
+        done();
+      });
+  });
+
+  it("impossível excluir usuário que não existe", function (done) {
+    chai
+      .request(app)
+      .delete("/users/10")
       .end(function (err, res) {
         expect(err).to.be.null;
         expect(res).to.have.status(404);
